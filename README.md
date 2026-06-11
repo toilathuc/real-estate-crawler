@@ -404,6 +404,76 @@ Linux/macOS Bash:
 .venv/bin/python -m unittest discover -s tests
 ```
 
+## Performance Evaluation
+
+This project already includes the benchmark scripts used for the report section on batch pipeline performance.
+
+Bronze -> Silver benchmark:
+
+```bash
+source .venv/bin/activate
+python3 tests/perf/measure_silver_parser.py
+```
+
+What you should see in the terminal:
+
+```text
+n_records | time_s | rec_per_s | peak_mb | ok | fail
+1900
+10000
+50000
+```
+
+Silver -> Gold Spark benchmark with event log enabled:
+
+```bash
+source .venv/bin/activate
+export PYTHONPATH=src
+export SPARK_EVENTLOG_ENABLED=true
+export SPARK_EVENTLOG_DIR=/tmp/spark-events
+export SPARK_DRIVER_MEMORY=4g
+python3 -m transform.silver_to_gold
+python3 tests/perf/parse_spark_log.py
+```
+
+To compare 4GB vs 2GB, rerun with `SPARK_DRIVER_MEMORY=2g` and parse the event log again.
+
+VM monitoring while Spark is running:
+
+```bash
+source .venv/bin/activate
+export VM_MEASURE_CMD='PYTHONPATH=src SPARK_EVENTLOG_ENABLED=true SPARK_EVENTLOG_DIR=/tmp/spark-events SPARK_DRIVER_MEMORY=4g .venv/bin/python -m transform.silver_to_gold'
+bash tests/perf/measure_vm_resources.sh
+```
+
+What you should see in the terminal:
+
+```text
+Avg CPU idle
+Avg swap in
+Avg swap out
+Max swap in
+Max swap out
+```
+
+Where to read the outputs:
+
+```text
+Bronze -> Silver: terminal output from tests/perf/measure_silver_parser.py
+Spark metrics: terminal output from tests/perf/parse_spark_log.py
+VM metrics: terminal output from tests/perf/measure_vm_resources.sh
+Spark event logs: /tmp/spark-events/
+VMStat log: /tmp/spark_resource_log.txt
+```
+
+Report checklist:
+
+```text
+1. Bronze -> Silver: throughput + peak memory table for 1,900 / 10,000 / 50,000 records
+2. Silver -> Gold: 2GB vs 4GB runtime + stage duration + shuffle bytes
+3. VM: CPU idle + swap in/out while Spark is running
+```
+
 ## List Page Debugging
 
 List page debug files are stored separately by `crawl_id` to avoid overwriting previous runs:
