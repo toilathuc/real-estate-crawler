@@ -1,0 +1,191 @@
+[spark_session] SPARK_EVENTLOG_ENABLED= true -> True event_log_dir= /tmp/spark-events
+=== READ SILVER ===
+[silver_to_gold] Reading silver data from base path: data/silver
+[silver_to_gold] Found 76 parquet file(s) in crawl_id-partitioned layout
+[silver_to_gold] Sample parquet paths:
+  - data/silver/source=nhatot/crawl_date=2026-05-27/crawl_id=nhatot_20260527_013209/listings.parquet
+  - data/silver/source=nhatot/crawl_date=2026-05-27/crawl_id=nhatot_20260527_105802/listings.parquet
+  - data/silver/source=nhatot/crawl_date=2026-05-27/crawl_id=nhatot_20260527_124732/listings.parquet
+[silver_to_gold] ... and 73 more file(s)
+[silver_to_gold] Loading parquet files into Spark DataFrame
+[silver_to_gold] Initial columns: source, source_code, crawl_date, crawl_id, listing_id, listing_url, dedup_key, dedup_method, title_raw, description_raw, price_raw, area_raw, location_raw, price_value, price_unit, price_vnd, area_m2, unit_price_vnd_m2, property_type_raw, property_type_group, listing_business_type, city_raw, district_raw, ward_raw, street_raw, project_raw, city_norm, district_norm, ward_norm, location_confidence, location_parse_method, bedroom_count, bathroom_count, floor_count, seller_type, seller_years_on_platform, seller_active_listing_count, has_broker_certificate, phone_masked, image_count, has_image, posted_date_raw, expired_date_raw, posted_date, expired_date, parse_status, parse_error_message, raw_html_path, raw_text_path, metadata_path, parser_version, processed_at, has_legal_info, legal_status_raw, has_red_pink_book, furniture_level, frontage_width, project_name, is_business_suitable, has_urban_area_flag, has_security_flag, has_educated_community_flag, has_high_intellect_flag, has_residential_area_flag, has_subdivision_flag, direction, is_price_negotiable, has_car_access, car_access_type, building_name, is_missing_price, is_missing_area, is_missing_location, is_invalid_price, is_invalid_area, is_outlier_price, is_outlier_area
+[silver_to_gold] Silver DataFrame is ready
+=== ADD DEDUP KEY ===
+=== ADD DUPLICATE FLAGS ===
+=== RECORD COUNT BY DATE BEFORE DEDUP ===
++----------+-----+
+|crawl_date|count|
++----------+-----+
+|2026-04-26|706  |
+|2026-04-27|320  |
+|2026-04-28|793  |
+|2026-04-29|556  |
+|2026-04-30|491  |
+|2026-05-01|1116 |
+|2026-05-02|555  |
+|2026-05-03|554  |
+|2026-05-04|495  |
+|2026-05-05|538  |
+|2026-05-06|409  |
+|2026-05-07|474  |
+|2026-05-08|510  |
+|2026-05-09|528  |
+|2026-05-10|529  |
+|2026-05-11|529  |
+|2026-05-12|524  |
+|2026-05-13|722  |
+|2026-05-14|677  |
+|2026-05-15|715  |
++----------+-----+
+only showing top 20 rows
+=== DEDUP METHOD COUNT ===
++------------+-----+
+|dedup_method|count|
++------------+-----+
+|listing_id  |28034|
++------------+-----+
+
+=== DUPLICATE SUMMARY ===
++----------+-------------+-----------------+-------------------+
+|crawl_date|total_records|duplicate_records|distinct_dedup_keys|
++----------+-------------+-----------------+-------------------+
+|2026-04-26|706          |148              |626                |
+|2026-04-27|320          |0                |320                |
+|2026-04-28|793          |8                |789                |
+|2026-04-29|556          |0                |556                |
+|2026-04-30|491          |0                |491                |
+|2026-05-01|1116         |846              |656                |
+|2026-05-02|555          |0                |555                |
+|2026-05-03|554          |0                |554                |
+|2026-05-04|495          |0                |495                |
+|2026-05-05|538          |0                |538                |
+|2026-05-06|409          |0                |409                |
+|2026-05-07|474          |0                |474                |
+|2026-05-08|510          |0                |510                |
+|2026-05-09|528          |0                |528                |
+|2026-05-10|529          |0                |529                |
+|2026-05-11|529          |0                |529                |
+|2026-05-12|524          |0                |524                |
+|2026-05-13|722          |0                |722                |
+|2026-05-14|677          |0                |677                |
+|2026-05-15|715          |0                |715                |
++----------+-------------+-----------------+-------------------+
+only showing top 20 rows
+=== DAILY DEDUP ===
++----------+-----+
+|crawl_date|count|
++----------+-----+
+|2026-04-26|626  |
+|2026-04-27|320  |
+|2026-04-28|789  |
+|2026-04-29|556  |
+|2026-04-30|491  |
+|2026-05-01|656  |
+|2026-05-02|555  |
+|2026-05-03|554  |
+|2026-05-04|495  |
+|2026-05-05|538  |
+|2026-05-06|409  |
+|2026-05-07|474  |
+|2026-05-08|510  |
+|2026-05-09|528  |
+|2026-05-10|529  |
+|2026-05-11|529  |
+|2026-05-12|524  |
+|2026-05-13|722  |
+|2026-05-14|677  |
+|2026-05-15|715  |
++----------+-----+
+only showing top 20 rows
+=== BUILD LIFECYCLE ===
+=== BUILD SNAPSHOT TABLE ===
+=== ADD PRICE CHANGE TRACKING ===
+=== ADD INFO CHANGE TRACKING ===
+=== BUILD REMOVED LISTINGS ===
+=== SNAPSHOT STATUS COUNT ===
++-------------+---------------+-----+
+|snapshot_date|snapshot_status|count|
++-------------+---------------+-----+
+|2026-04-26   |new            |626  |
+|2026-04-27   |active         |246  |
+|2026-04-27   |new            |74   |
+|2026-04-28   |active         |437  |
+|2026-04-28   |new            |352  |
+|2026-04-29   |active         |432  |
+|2026-04-29   |new            |124  |
+|2026-04-30   |active         |390  |
+|2026-04-30   |changed_price  |6    |
+|2026-04-30   |new            |95   |
+|2026-05-01   |active         |476  |
+|2026-05-01   |changed_price  |1    |
+|2026-05-01   |new            |179  |
+|2026-05-02   |active         |443  |
+|2026-05-02   |new            |112  |
+|2026-05-03   |active         |455  |
+|2026-05-03   |changed_price  |1    |
+|2026-05-03   |new            |98   |
+|2026-05-04   |active         |332  |
+|2026-05-04   |changed_price  |6    |
++-------------+---------------+-----+
+only showing top 20 rows
+=== PRICE CHANGE COUNT ===
++-------------+----------------+-------------------+
+|snapshot_date|snapshot_records|price_changed_count|
++-------------+----------------+-------------------+
+|2026-04-26   |626             |0                  |
+|2026-04-27   |320             |0                  |
+|2026-04-28   |789             |0                  |
+|2026-04-29   |556             |0                  |
+|2026-04-30   |491             |6                  |
+|2026-05-01   |656             |1                  |
+|2026-05-02   |555             |0                  |
+|2026-05-03   |554             |1                  |
+|2026-05-04   |495             |6                  |
+|2026-05-05   |538             |1                  |
+|2026-05-06   |409             |3                  |
+|2026-05-07   |474             |8                  |
+|2026-05-08   |510             |6                  |
+|2026-05-09   |528             |8                  |
+|2026-05-10   |529             |5                  |
+|2026-05-11   |529             |6                  |
+|2026-05-12   |524             |9                  |
+|2026-05-13   |722             |7                  |
+|2026-05-14   |677             |6                  |
+|2026-05-15   |715             |5                  |
++-------------+----------------+-------------------+
+only showing top 20 rows
+=== REMOVED COUNT ===
++-------------+---------------+-----+
+|snapshot_date|snapshot_status|count|
++-------------+---------------+-----+
+|2026-04-27   |removed        |380  |
+|2026-04-28   |removed        |59   |
+|2026-04-29   |removed        |370  |
+|2026-04-30   |removed        |185  |
+|2026-05-01   |removed        |99   |
+|2026-05-02   |removed        |240  |
+|2026-05-03   |removed        |138  |
+|2026-05-04   |removed        |267  |
+|2026-05-05   |removed        |204  |
+|2026-05-06   |removed        |276  |
+|2026-05-07   |removed        |171  |
+|2026-05-08   |removed        |160  |
+|2026-05-09   |removed        |160  |
+|2026-05-10   |removed        |147  |
+|2026-05-11   |removed        |212  |
+|2026-05-12   |removed        |206  |
+|2026-05-13   |removed        |141  |
+|2026-05-14   |removed        |287  |
+|2026-05-15   |removed        |239  |
+|2026-05-16   |removed        |186  |
++-------------+---------------+-----+
+only showing top 20 rows
+=== BUILD GOLD TABLES ===
+=== WRITE GOLD TABLES ===
+=== WRITE PHASE 3 SUMMARY ===
+[silver_to_gold] Phase 3 summary written to: data/gold/phase3_summary.json
+=== DONE PHASE 3 ===
+Gold output written to: data/gold
+
+=== VM Resource Summary (/tmp/spark_resource_log.txt) ===
+No vmstat samples were parsed.
