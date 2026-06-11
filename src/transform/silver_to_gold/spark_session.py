@@ -54,5 +54,5 @@ def create_spark() -> SparkSession:
             "spark.eventLog.dir", event_log_dir
         )
 
-
     return builder.getOrCreate()
+
