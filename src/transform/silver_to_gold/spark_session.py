@@ -17,7 +17,8 @@ def create_spark() -> SparkSession:
     shuffle_partitions = os.getenv("SPARK_SQL_SHUFFLE_PARTITIONS", "8")
     default_parallelism = os.getenv("SPARK_DEFAULT_PARALLELISM", shuffle_partitions)
     max_result_size = os.getenv("SPARK_DRIVER_MAX_RESULT_SIZE", "1g")
-    event_log_enabled = os.getenv("SPARK_EVENTLOG_ENABLED", "false").lower() in {
+    event_log_enabled_raw = os.getenv("SPARK_EVENTLOG_ENABLED", "false")
+    event_log_enabled = event_log_enabled_raw.lower() in {
         "1",
         "true",
         "yes",
@@ -39,9 +40,19 @@ def create_spark() -> SparkSession:
         .config("spark.sql.execution.arrow.pyspark.enabled", "false")
     )
 
+    print(
+        "[spark_session] SPARK_EVENTLOG_ENABLED=",
+        os.getenv("SPARK_EVENTLOG_ENABLED"),
+        "->",
+        event_log_enabled,
+        "event_log_dir=",
+        event_log_dir,
+    )
+
     if event_log_enabled:
         builder = builder.config("spark.eventLog.enabled", "true").config(
             "spark.eventLog.dir", event_log_dir
         )
+
 
     return builder.getOrCreate()

@@ -412,7 +412,7 @@ Bronze -> Silver benchmark:
 
 ```bash
 source .venv/bin/activate
-python3 tests/perf/measure_silver_parser.py
+python3 tests/perf/measure_silver_parser.py | tee /tmp/bronze_silver_benchmark.log
 ```
 
 What you should see in the terminal:
@@ -432,18 +432,44 @@ export PYTHONPATH=src
 export SPARK_EVENTLOG_ENABLED=true
 export SPARK_EVENTLOG_DIR=/tmp/spark-events
 export SPARK_DRIVER_MEMORY=4g
-python3 -m transform.silver_to_gold
-python3 tests/perf/parse_spark_log.py
+rm -rf /tmp/spark-events/*
+/usr/bin/time -f 'elapsed=%e' python3 -m transform.silver_to_gold 2>&1 | tee /tmp/spark_4g_run.log
+python3 tests/perf/parse_spark_log.py | tee /tmp/spark_4g_metrics.log
 ```
 
 To compare 4GB vs 2GB, rerun with `SPARK_DRIVER_MEMORY=2g` and parse the event log again.
+
+```bash
+source .venv/bin/activate
+export PYTHONPATH=src
+export SPARK_EVENTLOG_ENABLED=true
+export SPARK_EVENTLOG_DIR=/tmp/spark-events
+export SPARK_DRIVER_MEMORY=2g
+rm -rf /tmp/spark-events/*
+/usr/bin/time -f 'elapsed=%e' python3 -m transform.silver_to_gold 2>&1 | tee /tmp/spark_2g_run.log
+python3 tests/perf/parse_spark_log.py | tee /tmp/spark_2g_metrics.log
+```
 
 VM monitoring while Spark is running:
 
 ```bash
 source .venv/bin/activate
 export VM_MEASURE_CMD='PYTHONPATH=src SPARK_EVENTLOG_ENABLED=true SPARK_EVENTLOG_DIR=/tmp/spark-events SPARK_DRIVER_MEMORY=4g .venv/bin/python -m transform.silver_to_gold'
-bash tests/perf/measure_vm_resources.sh
+bash tests/perf/measure_vm_resources.sh | tee /tmp/vm_4g_metrics.log
+```
+
+Run the same command with `SPARK_DRIVER_MEMORY=2g` and save to `/tmp/vm_2g_metrics.log` for the comparison table.
+
+Generate the report and charts:
+
+```bash
+source .venv/bin/activate
+python3 tests/perf/build_perf_report.py \
+  --bronze-log /tmp/bronze_silver_benchmark.log \
+  --spark-4g-log /tmp/spark_4g_run.log \
+  --spark-2g-log /tmp/spark_2g_run.log \
+  --vm-4g-log /tmp/vm_4g_metrics.log \
+  --vm-2g-log /tmp/vm_2g_metrics.log
 ```
 
 What you should see in the terminal:
@@ -464,6 +490,9 @@ Spark metrics: terminal output from tests/perf/parse_spark_log.py
 VM metrics: terminal output from tests/perf/measure_vm_resources.sh
 Spark event logs: /tmp/spark-events/
 VMStat log: /tmp/spark_resource_log.txt
+Generated report: data/reports/performance/performance_report.md
+Generated charts: data/reports/performance/*.html
+Bronze CSV: data/reports/performance/bronze_benchmark.csv
 ```
 
 Report checklist:
